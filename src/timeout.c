@@ -257,8 +257,8 @@ Start COMMAND, and kill it if still running after DURATION.\n\
                    this long after the initial signal was sent\n\
   --wait-for-process-group=DURATION\n\
                  wait for all processes in the current process group to finish\n\
-                 this long after the initial signal was sent; if some\n\
-                 processes are left, send a KILL signal (same as -k DURATION).\n\
+                   this long after the initial signal was sent; if some\n\
+                   processes are left, send a KILL signal (same as -k DURATION).\n\
   -s, --signal=SIGNAL\n\
                  specify the signal to be sent on timeout;\n\
                    SIGNAL may be a name like 'HUP' or a number;\n\
