@@ -373,7 +373,9 @@ int parse_process_tree( int verbose )
 {
     int ownpid;
     ownpid = getpid();
-    PROCTAB* proc = openproc(PROC_FILLCOM | PROC_FILLSTAT | PROC_FILLGRP);
+    int flags = PROC_FILLGRP | PROC_FILLSTAT;
+    if ( verbose ) flags = flags | PROC_FILLCOM;
+    PROCTAB* proc = openproc(flags);
     proc_t proc_info;
     memset(&proc_info, 0, sizeof(proc_info));
     int first = 1;
