@@ -85,6 +85,7 @@ static int timed_out;
 static int term_signal = SIGTERM;  /* same default as kill command.  */
 static int monitored_pid;
 static double kill_after;
+static int wait_for_process_group;
 static bool foreground;      /* whether to use another program group.  */
 static bool preserve_status; /* whether to use a timeout status or not.  */
 
@@ -92,7 +93,8 @@ static bool preserve_status; /* whether to use a timeout status or not.  */
 enum
 {
       FOREGROUND_OPTION = CHAR_MAX + 1,
-      PRESERVE_STATUS_OPTION
+      PRESERVE_STATUS_OPTION,
+      WAIT_FOR_PROCESS_GROUP_OPTION
 };
 
 static struct option const long_options[] =
@@ -101,6 +103,7 @@ static struct option const long_options[] =
   {"signal", required_argument, NULL, 's'},
   {"foreground", no_argument, NULL, FOREGROUND_OPTION},
   {"preserve-status", no_argument, NULL, PRESERVE_STATUS_OPTION},
+  {"wait-for-process-group", required_argument, NULL, WAIT_FOR_PROCESS_GROUP_OPTION},
   {GETOPT_HELP_OPTION_DECL},
   {GETOPT_VERSION_OPTION_DECL},
   {NULL, 0, NULL, 0}
@@ -398,21 +401,15 @@ int parse_process_tree( int verbose )
 
 int parse_process_tree_until_empty( int verbose )
 {
-    // by default, wait 25 seconds
-    // if '-k' is used, wait forever, will be killed anyway
-    int iter = 0;
-    int maxwait = 25 * 1000000; // microseconds
     int eachwait = 10000;
-    int max_iter = maxwait / eachwait;
-    int unlimited = ( kill_after > 0 );
     int count = 0;
     int v = verbose;
-    while ( iter < max_iter || unlimited ) {
+    while ( 1 ) {
         if ( (count = parse_process_tree( v )) <= 1 ) break;
         usleep(eachwait);
-        ++iter;
     }
-    if ( count > 1 ) parse_process_tree( 1 );
+    /* shouldn't happen: timeout itself in this process group. */
+    if ( !count ) { error (0, errno, _("error counting processes in the group")); return -1; }
     return count;
 }
 
@@ -452,6 +449,11 @@ main (int argc, char **argv)
 
         case PRESERVE_STATUS_OPTION:
           preserve_status = true;
+          break;
+
+        case WAIT_FOR_PROCESS_GROUP_OPTION:
+          wait_for_process_group = 1;
+          kill_after = parse_duration (optarg);
           break;
 
         case_GETOPT_HELP_CHAR;
@@ -509,7 +511,7 @@ main (int argc, char **argv)
   else
     {
       pid_t wait_result;
-      int status;
+      int status, count;
 
       settimeout (timeout);
 
@@ -517,7 +519,6 @@ main (int argc, char **argv)
              && errno == EINTR)
         continue;
 
-      parse_process_tree_until_empty( 0 );
       if (wait_result < 0)
         {
           /* shouldn't happen.  */
@@ -526,6 +527,10 @@ main (int argc, char **argv)
         }
       else
         {
+          if ( wait_for_process_group ) {
+            count = parse_process_tree_until_empty( 0 );
+            if ( count < 0 ) status = EXIT_FAILURE;
+          }
           if (WIFEXITED (status))
             status = WEXITSTATUS (status);
           else if (WIFSIGNALED (status))
