@@ -473,6 +473,10 @@ AC_SUBST([built_programs], [$optional_bin_progs])
 
 AM_CONDITIONAL([CROSS_COMPILING], [test "$cross_compiling" = yes])
 
+# use procps library for timeout-group
+AC_CHECK_HEADER([proc/readproc.h], [], AC_MSG_ERROR([headers for procps library are not installed.]))
+AC_CHECK_LIB([procps], [readproc], [], AC_MSG_ERROR([procps library is not installed.]))
+
 ############################################################################
 
 # As long as "grep 'PRI[diouxX]' po/*.pot" reports matches in
