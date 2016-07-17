@@ -1,5 +1,5 @@
 [NAME]
-timeout \- run a command with a time limit
+timeout-group \- run a command with a time limit
 [DESCRIPTION]
 .\" Add any additional description here
 [SEE ALSO]
