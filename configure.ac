@@ -27,6 +27,8 @@ AC_INIT([GNU coreutils],
         m4_esyscmd([build-aux/git-version-gen .tarball-version]),
         [bug-coreutils@gnu.org])
 
+program_suffix="-group"
+
 AC_CONFIG_SRCDIR([src/ls.c])
 
 AC_CONFIG_AUX_DIR([build-aux])
