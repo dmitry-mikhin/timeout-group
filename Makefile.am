@@ -17,7 +17,7 @@
 
 ALL_RECURSIVE_TARGETS =
 
-SUBDIRS = po . gnulib-tests
+SUBDIRS = . gnulib-tests
 
 changelog_etc =				\
   ChangeLog-2005			\
