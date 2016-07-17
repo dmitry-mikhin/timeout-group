@@ -77,7 +77,9 @@
 
 #define PROGRAM_NAME "timeout"
 
-#define AUTHORS proper_name_utf8 ("Padraig Brady", "P\303\241draig Brady")
+#define AUTHORS \
+    proper_name_utf8 ("Padraig Brady", "P\303\241draig Brady"), \
+    proper_name ("Dmitry Mikhin (extension to wait for process group)")
 
 static int timed_out;
 static int term_signal = SIGTERM;  /* same default as kill command.  */
@@ -244,7 +246,11 @@ Start COMMAND, and kill it if still running after DURATION.\n\
                  In this mode, children of COMMAND will not be timed out.\n\
   -k, --kill-after=DURATION\n\
                  also send a KILL signal if COMMAND is still running\n\
-                 this long after the initial signal was sent.\n\
+                 this long after the initial signal was sent\n\
+  --wait-for-process-group=DURATION\n\
+                 wait for all processes in the current process group to finish\n\
+                 this long after the initial signal was sent; if some\n\
+                 processes are left, send a KILL signal (same as -k DURATION).\n\
   -s, --signal=SIGNAL\n\
                  specify the signal to be sent on timeout.\n\
                  SIGNAL may be a name like 'HUP' or a number.\n\
