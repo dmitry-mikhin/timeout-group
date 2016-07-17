@@ -184,7 +184,6 @@ send_sig (int where, int sig)
 static void
 cleanup (int sig)
 {
-  fprintf( stderr, "enter cleanup\n" );
   if (sig == SIGALRM)
     {
       timed_out = 1;
@@ -219,7 +218,6 @@ cleanup (int sig)
     }
   else /* we're the child or the child is not exec'd yet.  */
     _exit (128 + sig);
-  fprintf( stderr, "cleanup finished\n" );
 }
 
 void
@@ -371,40 +369,41 @@ disable_core_dumps (void)
   return false;
 }
 
-int parse_process_tree()
+int parse_process_tree( int verbose )
 {
     int ownpid;
     ownpid = getpid();
-    PROCTAB* proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS | PROC_FILLGRP);
+    PROCTAB* proc = openproc(PROC_FILLCOM | PROC_FILLSTAT | PROC_FILLGRP);
     proc_t proc_info;
     memset(&proc_info, 0, sizeof(proc_info));
     int first = 1;
     int count = 0;
     while (readproc(proc, &proc_info) != NULL) {
         if ( proc_info.pgrp == ownpid ) {
-            if ( first ) { fprintf(stderr, "extant processes in group %d\n", ownpid); first = 0; }
+            if ( first && verbose ) { fprintf(stderr, "extant processes in group %d\n", ownpid); first = 0; }
             ++count;
-            fprintf(stderr,
-                    "%20s:\t%5ld\t%5lld\t%5lld\n",
-                    proc_info.cmd, proc_info.resident,
-                    proc_info.utime, proc_info.stime);
+            if ( verbose ) fprintf(stderr,
+                                   "%20s:\t%5d\t%5d\t%c\t%12lld\n",
+                                   proc_info.cmd, proc_info.tid, proc_info.pgrp, proc_info.state, proc_info.start_time);
         }
     }
     closeproc(proc);
     return count;
 }
 
-int parse_process_tree_until_empty()
+int parse_process_tree_until_empty( int verbose )
 {
     int iter = 0;
     int max_iter = 1024;
     int count = 0;
+    int v = verbose;
     do {
-        if ( (count = parse_process_tree()) <= 1 ) break;
+        if ( (count = parse_process_tree( v )) <= 1 ) break;
         usleep(10000);
         ++iter;
     }
     while ( iter < max_iter );
+    if ( count > 1 ) parse_process_tree( 1 );
     return count;
 }
 
@@ -509,8 +508,7 @@ main (int argc, char **argv)
              && errno == EINTR)
         continue;
 
-      fprintf( stderr, "after waitpid\n" );
-      parse_process_tree_until_empty();
+      parse_process_tree_until_empty( 0 );
       if (wait_result < 0)
         {
           /* shouldn't happen.  */
