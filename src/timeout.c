@@ -280,6 +280,9 @@ any process that does not block or catch that signal.  It may be necessary\n\
 to use the KILL (9) signal, since this signal cannot be caught, in which\n\
 case the exit status is 128+9 rather than 124.\n"), stdout);
       emit_ancillary_info (PROGRAM_NAME);
+      fputs (_("\
+Waiting for the process group option added by D. Mikhin, report bugs to\n\
+dmitrym@acfr.usyd.edu.au\n"), stdout);
     }
   exit (status);
 }
