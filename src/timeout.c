@@ -392,16 +392,20 @@ int parse_process_tree( int verbose )
 
 int parse_process_tree_until_empty( int verbose )
 {
+    // by default, wait 25 seconds
+    // if '-k' is used, wait forever, will be killed anyway
     int iter = 0;
-    int max_iter = 1024;
+    int maxwait = 25 * 1000000; // microseconds
+    int eachwait = 10000;
+    int max_iter = maxwait / eachwait;
+    int unlimited = ( kill_after > 0 );
     int count = 0;
     int v = verbose;
-    do {
+    while ( iter < max_iter || unlimited ) {
         if ( (count = parse_process_tree( v )) <= 1 ) break;
-        usleep(10000);
+        usleep(eachwait);
         ++iter;
     }
-    while ( iter < max_iter );
     if ( count > 1 ) parse_process_tree( 1 );
     return count;
 }
