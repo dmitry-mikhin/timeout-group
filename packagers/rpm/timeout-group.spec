@@ -171,9 +171,6 @@ make all %{?_smp_mflags}
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
 
-%check
-make check
-
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
 
