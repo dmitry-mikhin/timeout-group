@@ -1,16 +1,11 @@
-Summary: A set of basic GNU tools commonly used in shell scripts
-Name:    coreutils
+Summary: An extended replacement for the coreutils timeout utility
+Name:    timeout-group
 Version: 8.22
 Release: 15%{?dist}.1
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
-Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
-Source101:  coreutils-DIR_COLORS
-Source102:  coreutils-DIR_COLORS.lightbgcolor
-Source103:  coreutils-DIR_COLORS.256color
-Source105:  coreutils-colorls.sh
-Source106:  coreutils-colorls.csh
+Source0: ftp://ftp.gnu.org/gnu/%{name}/coreutils-%{version}.tar.xz
 
 # From upstream
 #Fix segfault in cp (in selinux context code)
@@ -74,38 +69,8 @@ Patch913: coreutils-8.22-temporarytestoff.patch
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 
-Conflicts: filesystem < 3
-Provides: /bin/basename
-Provides: /bin/cat
-Provides: /bin/chgrp
-Provides: /bin/chmod
-Provides: /bin/chown
-Provides: /bin/cp
-Provides: /bin/cut
-Provides: /bin/date
-Provides: /bin/dd
-Provides: /bin/df
-Provides: /bin/echo
-Provides: /bin/env
-Provides: /bin/false
-Provides: /bin/ln
-Provides: /bin/ls
-Provides: /bin/mkdir
-Provides: /bin/mknod
-Provides: /bin/mktemp
-Provides: /bin/mv
-Provides: /bin/nice
-Provides: /bin/pwd
-Provides: /bin/readlink
-Provides: /bin/rm
-Provides: /bin/rmdir
-Provides: /bin/sleep
-Provides: /bin/sort
-Provides: /bin/stty
-Provides: /bin/sync
-Provides: /bin/touch
-Provides: /bin/true
-Provides: /bin/uname
+# timeout extensions
+Patch10000: timeout-group-v8.22.patch
 
 BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
@@ -119,6 +84,7 @@ BuildRequires: openssl-devel
 BuildRequires: gmp-devel
 BuildRequires: attr
 BuildRequires: strace
+BuildRequires: procps-devel
 
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -126,25 +92,11 @@ Requires(post): /sbin/install-info
 Requires(post): grep
 Requires:       ncurses
 Requires:       gmp
-
-Provides: fileutils = %{version}-%{release}
-Provides: sh-utils = %{version}-%{release}
-Provides: stat = %{version}-%{release}
-Provides: textutils = %{version}-%{release}
-#old mktemp package had epoch 3, so we have to use 4 for coreutils
-Provides: mktemp = 4:%{version}-%{release}
-Provides: bundled(gnulib)
-Obsoletes: mktemp < 4:%{version}-%{release}
-Obsoletes: fileutils <= 4.1.9
-Obsoletes: sh-utils <= 2.0.12
-Obsoletes: stat <= 3.3
-Obsoletes: textutils <= 2.0.21
-#coreutils-libs dropped in f17
-Obsoletes: coreutils-libs < 8.13
+Requires:       procps
 
 %description
-These are the GNU core utilities.  This package is the combination of
-the old GNU fileutils, sh-utils, and textutils packages.
+This is an extended clone for the timeout utility from the GNU core utilities.
+It can wait for completion of a process group.
 
 %prep
 %setup -q
@@ -188,6 +140,9 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch951 -p1 -b .selinuxman
 %patch5 -p1 -b .separate
 
+# timeout extensions
+%patch10000 -p1 -b .timeout
+
 chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/cp/no-ctx.sh tests/dd/stats.sh || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
@@ -205,7 +160,6 @@ autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile \
            --with-openssl=optional ac_cv_lib_crypto_MD5=no \
-           --enable-install-program=hostname,arch \
            --with-tty-group \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 
@@ -226,36 +180,10 @@ make DESTDIR=$RPM_BUILD_ROOT install
 # man pages are not installed with make install
 make mandir=$RPM_BUILD_ROOT%{_mandir} install-man
 
-# fix japanese catalog file
-if [ -d $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
-   mkdir -p $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
-   mv $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES/*mo \
-      $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
-   rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC
-fi
-
 bzip2 -9f ChangeLog
-
-# let be compatible with old fileutils, sh-utils and textutils packages :
-mkdir -p $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}
 
 # chroot was in /usr/sbin :
 mv $RPM_BUILD_ROOT{%_bindir,%_sbindir}/chroot
-
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
-install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
-install -p -c -m644 %SOURCE102 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.lightbgcolor
-install -p -c -m644 %SOURCE103 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.256color
-install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
-install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
-
-# These come from util-linux and/or procps.
-for i in hostname uptime kill ; do
-    rm $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
-done
-
-# Compress ChangeLogs from before the fileutils/textutils/etc merge
-bzip2 -f9 old/*/C*
 
 # Use hard links instead of symbolic links for LC_TIME files (bug #246729).
 find %{buildroot}%{_datadir}/locale -type l | \
@@ -271,144 +199,15 @@ find %{buildroot}%{_datadir}/locale -type l | \
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
-%pre
-# We must deinstall these info files since they're merged in
-# coreutils.info. else their postun'll be run too late
-# and install-info will fail badly because of duplicates
-for file in sh-utils textutils fileutils; do
-  if [ -f %{_infodir}/$file.info.gz ]; then
-    /sbin/install-info --delete %{_infodir}/$file.info.gz --dir=%{_infodir}/dir &> /dev/null || :
-  fi
-done
-
-%preun
-if [ $1 = 0 ]; then
-  if [ -f %{_infodir}/%{name}.info.gz ]; then
-    /sbin/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-  fi
-fi
-
-%post
-%{_bindir}/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
-  %{_infodir}/dir.rpmmodify || exit 0
-    /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-if [ -f %{_infodir}/%{name}.info.gz ]; then
-  /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-fi
-
 %files -f %{name}.lang
 %defattr(-,root,root,-)
-%dir %{_datadir}/locale/*/LC_TIME
-%config(noreplace) %{_sysconfdir}/DIR_COLORS*
-%config(noreplace) %{_sysconfdir}/profile.d/*
 %doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
-%{_bindir}/arch
-%{_bindir}/basename
-%{_bindir}/cat
-%{_bindir}/chgrp
-%{_bindir}/chmod
-%{_bindir}/chown
-%{_bindir}/cp
-%{_bindir}/cut
-%{_bindir}/date
-%{_bindir}/dd
-%{_bindir}/df
-%{_bindir}/echo
-%{_bindir}/env
-%{_bindir}/false
-%{_bindir}/link
-%{_bindir}/ln
-%{_bindir}/ls
-%{_bindir}/mkdir
-%{_bindir}/mknod
-%{_bindir}/mv
-%{_bindir}/nice
-%{_bindir}/pwd
-%{_bindir}/readlink
-%{_bindir}/rm
-%{_bindir}/rmdir
-%{_bindir}/sleep
-%{_bindir}/sort
-%{_bindir}/stty
-%{_bindir}/sync
-%{_bindir}/mktemp
-%{_bindir}/touch
-%{_bindir}/true
-%{_bindir}/uname
-%{_bindir}/unlink
-%{_bindir}/[
-%{_bindir}/base64
-%{_bindir}/chcon
-%{_bindir}/cksum
-%{_bindir}/comm
-%{_bindir}/csplit
-%{_bindir}/dir
-%{_bindir}/dircolors
-%{_bindir}/dirname
-%{_bindir}/du
-%{_bindir}/expand
-%{_bindir}/expr
-%{_bindir}/factor
-%{_bindir}/fmt
-%{_bindir}/fold
-%{_bindir}/groups
-%{_bindir}/head
-%{_bindir}/hostid
-%{_bindir}/id
-%{_bindir}/install
-%{_bindir}/join
-%{_bindir}/logname
-%{_bindir}/md5sum
-%{_bindir}/mkfifo
-%{_bindir}/nl
-%{_bindir}/nohup
-%{_bindir}/nproc
-%{_bindir}/numfmt
-%{_bindir}/od
-%{_bindir}/paste
-%{_bindir}/pathchk
-%{_bindir}/pinky
-%{_bindir}/pr
-%{_bindir}/printenv
-%{_bindir}/printf
-%{_bindir}/ptx
-%{_bindir}/realpath
-%{_bindir}/runcon
-%{_bindir}/seq
-%{_bindir}/sha1sum
-%{_bindir}/sha224sum
-%{_bindir}/sha256sum
-%{_bindir}/sha384sum
-%{_bindir}/sha512sum
-%{_bindir}/shred
-%{_bindir}/shuf
-%{_bindir}/split
-%{_bindir}/stat
-%{_bindir}/stdbuf
-%{_bindir}/sum
-%{_bindir}/tac
-%{_bindir}/tail
-%{_bindir}/tee
-%{_bindir}/test
-%{_bindir}/timeout
-%{_bindir}/tr
-%{_bindir}/truncate
-%{_bindir}/tsort
-%{_bindir}/tty
-%{_bindir}/unexpand
-%{_bindir}/uniq
-%{_bindir}/users
-%{_bindir}/vdir
-%{_bindir}/wc
-%{_bindir}/who
-%{_bindir}/whoami
-%{_bindir}/yes
-%{_infodir}/coreutils*
-%{_libexecdir}/coreutils*
-%{_mandir}/man*/*
-%{_sbindir}/chroot
+%{_bindir}/timeout-group
 
 %changelog
+* Mon Jul 18 2016 Dmitry Mikhin <dmitrym@acfr.usyd.edu.au> - 8.22-15.1
+- adapted from coreutils to timeout-group
+
 * Wed Nov 25 2015 Ondrej Vasik <ovasik@redhat.com> - 8.22-15.1
 - cp: prevent potential sparse file corruption (#1285365)
 
