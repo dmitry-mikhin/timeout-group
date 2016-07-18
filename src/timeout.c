@@ -75,7 +75,7 @@
 # define SA_RESTART 0
 #endif
 
-#define PROGRAM_NAME "timeout-group"
+#define PROGRAM_NAME "gtimeout"
 
 #define AUTHORS \
     proper_name_utf8 ("Padraig Brady", "P\303\241draig Brady"), \

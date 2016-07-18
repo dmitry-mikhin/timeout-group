@@ -27,7 +27,7 @@ AC_INIT([GNU coreutils],
         m4_esyscmd([build-aux/git-version-gen .tarball-version]),
         [bug-coreutils@gnu.org])
 
-program_suffix="-group"
+program_prefix="g"
 
 AC_CONFIG_SRCDIR([src/ls.c])
 
@@ -493,7 +493,7 @@ AC_SUBST([built_programs], [$optional_bin_progs])
 
 AM_CONDITIONAL([CROSS_COMPILING], [test "$cross_compiling" = yes])
 
-# use procps library for timeout-group
+# use procps library for group timeout
 AC_CHECK_HEADER([proc/readproc.h], [], AC_MSG_ERROR([headers for procps library are not installed.]))
 AC_CHECK_LIB([procps], [readproc], [], AC_MSG_ERROR([procps library is not installed.]))
 
