@@ -119,7 +119,7 @@
 * tail: (coreutils)tail invocation.             Output the last part of files.
 * tee: (coreutils)tee invocation.               Redirect to multiple files.
 * test: (coreutils)test invocation.             File/string tests.
-* timeout-group: (coreutils)timeout-group invocation. Run with time limit.
+* gtimeout: (coreutils)gtimeout invocation.     Run with time limit.
 * touch: (coreutils)touch invocation.           Change file timestamps.
 * tr: (coreutils)tr invocation.                 Translate characters.
 * true: (coreutils)true invocation.             Do nothing, successfully.
@@ -203,7 +203,7 @@ Free Documentation License''.
 * User information::             id logname whoami groups users who
 * System context::               date arch nproc uname hostname hostid uptime
 * SELinux context::              chcon runcon
-* Modified command invocation::  chroot env nice nohup stdbuf timeout-group
+* Modified command invocation::  chroot env nice nohup stdbuf gtimeout
 * Process control::              kill
 * Delaying::                     sleep
 * Numeric operations::           factor numfmt seq
@@ -448,7 +448,7 @@ Modified command invocation
 * nice invocation::              Run a command with modified niceness
 * nohup invocation::             Run a command immune to hangups
 * stdbuf invocation::            Run a command with modified I/O buffering
-* timeout-group invocation::     Run a command with a time limit
+* gtimeout invocation::          Run a command with a time limit
 
 Process control
 
@@ -807,7 +807,7 @@ meanings with the values @samp{0} and @samp{1}.
 Here are some of the exceptions:
 @command{chroot}, @command{env}, @command{expr}, @command{nice},
 @command{nohup}, @command{numfmt}, @command{printenv}, @command{sort},
-@command{stdbuf}, @command{test}, @command{timeout-group}, @command{tty}.
+@command{stdbuf}, @command{test}, @command{gtimeout}, @command{tty}.
 
 
 @node Backup options
@@ -16180,7 +16180,7 @@ user, etc.
 * nice invocation::             Modify niceness.
 * nohup invocation::            Immunize to hangups.
 * stdbuf invocation::           Modify buffering of standard streams.
-* timeout-group invocation::    Run with time limit.
+* gtimeout invocation::         Run with time limit.
 @end menu
 
 
@@ -16749,18 +16749,18 @@ the exit status of @var{command} otherwise
 @end display
 
 
-@node timeout-group invocation
-@section @command{timeout-group}: Run a command with a time limit
+@node gtimeout invocation
+@section @command{gtimeout}: Run a command with a time limit
 
-@pindex timeout-group
+@pindex gtimeout
 @cindex time limit
 @cindex run commands with bounded time
 
-@command{timeout-group} runs the given @var{command} and kills it if it is
+@command{gtimeout} runs the given @var{command} and kills it if it is
 still running after the specified time interval.  Synopsis:
 
 @example
-timeout-group [@var{option}] @var{duration} @var{command} [@var{arg}]@dots{}
+gtimeout [@var{option}] @var{duration} @var{command} [@var{arg}]@dots{}
 @end example
 
 @var{command} must not be a special built-in utility (@pxref{Special
@@ -16802,7 +16802,7 @@ themselves (like GDB for example).
 @opindex --kill-after
 Ensure the monitored @var{command} is killed by also sending a @samp{KILL}
 signal, after the specified @var{duration}.  Without this option, if the
-selected signal proves not to be fatal, @command{timeout-group} does not kill
+selected signal proves not to be fatal, @command{gtimeout} does not kill
 the @var{command}.
 
 @item -s @var{signal}
@@ -16826,12 +16826,12 @@ A duration of 0 disables the associated timeout.
 Note that the actual timeout duration is dependent on system conditions,
 which should be especially considered when specifying sub-second timeouts.
 
-@cindex exit status of @command{timeout-group}
+@cindex exit status of @command{gtimeout}
 Exit status:
 
 @display
 124 if @var{command} times out
-125 if @command{timeout-group} itself fails
+125 if @command{gtimeout} itself fails
 126 if @var{command} is found but cannot be invoked
 127 if @var{command} cannot be found
 137 if @var{command} is sent the KILL(9) signal (128+9)
