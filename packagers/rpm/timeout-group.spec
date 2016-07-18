@@ -99,7 +99,8 @@ This is an extended clone for the timeout utility from the GNU core utilities.
 It can wait for completion of a process group.
 
 %prep
-%setup -q -n coreutils-%{version}
+%setup -q -c timeout-group-%{version}
+( shopt -s dotglob; mv coreutils-%{version}/* . ; rm -r coreutils-%{version} )
 
 # From upstream
 %patch1 -p1 -b .nullcontext
