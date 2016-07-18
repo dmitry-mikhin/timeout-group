@@ -199,10 +199,11 @@ find %{buildroot}%{_datadir}/locale -type l | \
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
-%files -f %{name}.lang
+%files
 %defattr(-,root,root,-)
-%doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
-%{_bindir}/timeout-group
+%doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO
+%{_bindir}/timeoutg
+%{_mandir}/*/*
 
 %changelog
 * Mon Jul 18 2016 Dmitry Mikhin <dmitrym@acfr.usyd.edu.au> - 8.22-15.1
