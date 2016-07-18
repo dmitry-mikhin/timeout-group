@@ -1,5 +1,5 @@
 [NAME]
-gtimeout \- run a command with a time limit
+timeoutg \- run a command with a time limit
 [DESCRIPTION]
 .\" Add any additional description here
 [SEE ALSO]
