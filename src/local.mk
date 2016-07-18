@@ -37,6 +37,7 @@ pkglibexec_PROGRAMS = @pkglibexec_PROGRAMS@
 # Needed by the testsuite.
 noinst_PROGRAMS =		\
   src/getlimits			\
+  src/ginstall			\
   src/make-prime-list
 
 noinst_HEADERS =		\
