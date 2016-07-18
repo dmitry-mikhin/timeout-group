@@ -84,7 +84,7 @@ BuildRequires: openssl-devel
 BuildRequires: gmp-devel
 BuildRequires: attr
 BuildRequires: strace
-BuildRequires: procps-devel
+BuildRequires: procps-ng-devel
 
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -92,7 +92,7 @@ Requires(post): /sbin/install-info
 Requires(post): grep
 Requires:       ncurses
 Requires:       gmp
-Requires:       procps
+Requires:       procps-ng
 
 %description
 This is an extended clone for the timeout utility from the GNU core utilities.
