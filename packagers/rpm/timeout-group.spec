@@ -182,23 +182,6 @@ make mandir=$RPM_BUILD_ROOT%{_mandir} install-man
 
 bzip2 -9f ChangeLog
 
-# chroot was in /usr/sbin :
-mv $RPM_BUILD_ROOT{%_bindir,%_sbindir}/chroot
-
-# Use hard links instead of symbolic links for LC_TIME files (bug #246729).
-find %{buildroot}%{_datadir}/locale -type l | \
-(while read link
- do
-   target=$(readlink "$link")
-   rm -f "$link"
-   ln "$(dirname "$link")/$target" "$link"
- done)
-
-%find_lang %name
-
-# (sb) Deal with Installed (but unpackaged) file(s) found
-rm -f $RPM_BUILD_ROOT%{_infodir}/dir
-
 %files
 %defattr(-,root,root,-)
 %doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO
