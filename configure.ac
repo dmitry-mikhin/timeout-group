@@ -28,6 +28,7 @@ AC_INIT([GNU coreutils],
         [bug-coreutils@gnu.org])
 
 program_suffix="-group"
+enable_no_install_program="ginstall"
 
 AC_CONFIG_SRCDIR([src/ls.c])
 
