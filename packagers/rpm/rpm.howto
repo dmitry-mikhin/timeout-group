@@ -1,0 +1,69 @@
+Follow these instructions to build an RPM package of timeout-group.
+
+Timeout-group is a fork of the coreutils package that provides a modified
+version of the timeout utility named timeoutg. All the other routines in the
+original package are stripped. The new timeoutg utility has a different name,
+thus timeout-group can be installed and used in parallel with coreutils.
+
+1. Checkout the desired version of timeout-group package. The deployable
+   versions are branches of the source tree, typically named after the version,
+   such as "timeout-group-v8.22".
+
+       $ git checkout timeout-group-v8.22
+
+2. Look at the git history of the branch. This is best done in a graphic viewer
+   such a gitk. Search for the commit where the group forks from the main tree.
+   In case of timeout-group-v8.22, this happens at the commit
+   338446102698fa513ee399345811cb91827d05e5 (the mainline commit tagged v8.22).
+
+   Alternatively, you may search for the corresponding git tag of the coreutils:
+
+       $ git show-ref --tags | grep v8.22                                                                           
+       8829815b20157f54a19cd20c77ba07dc22ee4288 refs/tags/v8.22
+
+   This command shows the SHA of the tag object, not the commit object. Then
+       $ git log 8829815b20157f54a19cd20c77ba07dc22ee4288 --oneline | head -n 1
+       3384461 version 8.22
+
+   Again shows the mainline commit tagged v8.22.
+
+3. Create a temporary throwaway branch originated of the found commit:
+
+       $ git branch tmpsquash 3384461
+       $ git checkout tmpsquash
+
+   A temporary branch is apparently the simplest way to create a one-file patch
+   that would contain all the customizations of timeout-group applied as compared
+   with stock v8.22
+
+4. Merge the development branch onto the temporary branch squashing all the
+   commits together, commit, and extract the difference as a patch:
+
+       $ git merge --squash timeout-group-v8.22
+       $ git commit -a -m "All commits squashed into one"
+       $ git format-patch 3384461 --stdout > timeout-group-v8.22.patch
+
+   The patch file name must be the same as given in the spec file. Try to follow
+   the same convention and name patches after the coreutils version.
+
+5. Copy the patch file to a safe location and remove the temporary branch:
+
+       $ git checkout timeout-group-v8.22
+       $ git branch -D tmpsquash
+
+6. Take the original source rpm of coreutils and unpack it (the directory names
+   shown below follow the typical rpmbuild layout; your directories might differ
+   if a custom layout is used):
+
+       $ cd ~/rpmbuild/SOURCES
+       $ rpm2cpio ../SRPMS/coreutils-8.22-15.el7_2.1.src.rpm | cpio -dium
+
+   Copy the generated patch file to the SOURCES directory. Copy the timeout-group
+   spec file to the same directory. Create the new source rpm:
+
+       $ rpmbuild -bs timeout-group.spec
+
+7. Build the binary RPMS as usual:
+
+       $ cd ~/rpmbuild/SRPMS
+       $ rpmbuild --rebuild --clean timeout-group-8.22-15.el7.1.src.rpm
