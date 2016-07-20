@@ -386,6 +386,8 @@ disable_core_dumps (void)
   return false;
 }
 
+int parse_process_tree( int verbose );
+
 int parse_process_tree( int verbose )
 {
     int ownpid;
@@ -402,13 +404,15 @@ int parse_process_tree( int verbose )
             if ( first && verbose ) { fprintf(stderr, "extant processes in group %d\n", ownpid); first = 0; }
             ++count;
             if ( verbose ) fprintf(stderr,
-                                   "%20s:\t%5d\t%5d\t%c\t%12lld\n",
+                                   "%20s:\t%5d\t%5d\t%c\t%12llu\n",
                                    proc_info.cmd, proc_info.tid, proc_info.pgrp, proc_info.state, proc_info.start_time);
         }
     }
     closeproc(proc);
     return count;
 }
+
+int parse_process_tree_until_empty( int verbose );
 
 int parse_process_tree_until_empty( int verbose )
 {
