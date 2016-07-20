@@ -49,6 +49,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <float.h>
 #if HAVE_PRCTL
 # include <sys/prctl.h>
 #endif
@@ -258,7 +259,9 @@ Start COMMAND, and kill it if still running after DURATION.\n\
   --wait-for-process-group=DURATION\n\
                  wait for all processes in the current process group to finish\n\
                    this long after the initial signal was sent; if some\n\
-                   processes are left, send a KILL signal (same as -k DURATION).\n\
+                   processes are left, send a KILL signal (same as -k DURATION);\n\
+                   if both this option and '-k' is given, the duration specified\n\
+                   last on the command line takes precedence.\n\
   -s, --signal=SIGNAL\n\
                  specify the signal to be sent on timeout;\n\
                    SIGNAL may be a name like 'HUP' or a number;\n\
@@ -270,7 +273,9 @@ Start COMMAND, and kill it if still running after DURATION.\n\
       fputs (_("\n\
 DURATION is a floating point number with an optional suffix:\n\
 's' for seconds (the default), 'm' for minutes, 'h' for hours \
-or 'd' for days.\n"), stdout);
+or 'd' for days;\n\
+--wait-for-process-group accepts special duration 'forever' (not quoted) given\n\
+as a literal string.\n"), stdout);
 
       fputs (_("\n\
 If the command times out, and --preserve-status is not set, then exit with\n\
@@ -465,7 +470,11 @@ main (int argc, char **argv)
 
         case WAIT_FOR_PROCESS_GROUP_OPTION:
           wait_for_process_group = 1;
-          kill_after = parse_duration (optarg);
+          if ( strcmp( optarg, "forever" ) ) {
+              kill_after = parse_duration (optarg);
+          } else {
+              if ( !kill_after ) kill_after = DBL_MAX;
+          }
           break;
 
         case_GETOPT_HELP_CHAR;
