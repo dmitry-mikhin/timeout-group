@@ -89,12 +89,14 @@ static double kill_after;
 static int wait_for_process_group;
 static bool foreground;      /* whether to use another program group.  */
 static bool preserve_status; /* whether to use a timeout status or not.  */
+static bool verbose; /* more chatty.  */
 
 /* for long options with no corresponding short option, use enum */
 enum
 {
       FOREGROUND_OPTION = CHAR_MAX + 1,
       PRESERVE_STATUS_OPTION,
+      VERBOSE_OPTION,
       WAIT_FOR_PROCESS_GROUP_OPTION
 };
 
@@ -103,6 +105,7 @@ static struct option const long_options[] =
   {"kill-after", required_argument, NULL, 'k'},
   {"signal", required_argument, NULL, 's'},
   {"foreground", no_argument, NULL, FOREGROUND_OPTION},
+  {"verbose", no_argument, NULL, VERBOSE_OPTION},
   {"preserve-status", no_argument, NULL, PRESERVE_STATUS_OPTION},
   {"wait-for-process-group", required_argument, NULL, WAIT_FOR_PROCESS_GROUP_OPTION},
   {GETOPT_HELP_OPTION_DECL},
@@ -244,6 +247,8 @@ Start COMMAND, and kill it if still running after DURATION.\n\
       emit_mandatory_arg_note ();
 
       fputs (_("\
+      --verbose\n\
+                 chat more\n\
       --preserve-status\n\
                  exit with the same status as COMMAND, even when the\n\
                    command times out\n\
@@ -386,9 +391,9 @@ disable_core_dumps (void)
   return false;
 }
 
-int parse_process_tree( int verbose );
+int parse_process_tree( void );
 
-int parse_process_tree( int verbose )
+int parse_process_tree( void )
 {
     int ownpid;
     ownpid = getpid();
@@ -412,15 +417,14 @@ int parse_process_tree( int verbose )
     return count;
 }
 
-int parse_process_tree_until_empty( int verbose );
+int parse_process_tree_until_empty( void );
 
-int parse_process_tree_until_empty( int verbose )
+int parse_process_tree_until_empty( void )
 {
     int eachwait = 10000;
     int count = 0;
-    int v = verbose;
     while ( 1 ) {
-        if ( (count = parse_process_tree( v )) <= 1 ) break;
+        if ( (count = parse_process_tree()) <= 1 ) break;
         usleep(eachwait);
     }
     /* shouldn't happen: timeout itself in this process group. */
@@ -464,6 +468,10 @@ main (int argc, char **argv)
 
         case PRESERVE_STATUS_OPTION:
           preserve_status = true;
+          break;
+
+        case VERBOSE_OPTION:
+          verbose = true;
           break;
 
         case WAIT_FOR_PROCESS_GROUP_OPTION:
@@ -547,7 +555,7 @@ main (int argc, char **argv)
       else
         {
           if ( wait_for_process_group ) {
-            count = parse_process_tree_until_empty( 0 );
+            count = parse_process_tree_until_empty();
             if ( count < 0 ) status = EXIT_FAILURE;
           }
           if (WIFEXITED (status))
