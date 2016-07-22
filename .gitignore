@@ -6,13 +6,10 @@
 *.o
 */.deps/
 *~
-.*.swp
-.*.swo
 ._bootmp
 .gdb-history
 .kludge-stamp
 .version
-.gitignore
 /ABOUT-NLS
 /ChangeLog
 /GNUmakefile
