@@ -12,6 +12,7 @@
 .gdb-history
 .kludge-stamp
 .version
+.gitignore
 /ABOUT-NLS
 /ChangeLog
 /GNUmakefile
