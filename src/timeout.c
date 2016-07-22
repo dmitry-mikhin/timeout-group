@@ -391,13 +391,11 @@ disable_core_dumps (void)
   return false;
 }
 
-int parse_process_tree( void );
-
-int parse_process_tree( void )
+static int parse_process_tree( void )
 {
     int ownpid;
     ownpid = getpid();
-    int flags = PROC_FILLGRP | PROC_FILLSTAT;
+    int flags = PROC_FILLSTAT;
     if ( verbose ) flags = flags | PROC_FILLCOM;
     PROCTAB* proc = openproc(flags);
     proc_t proc_info;
@@ -417,9 +415,7 @@ int parse_process_tree( void )
     return count;
 }
 
-int parse_process_tree_until_empty( void );
-
-int parse_process_tree_until_empty( void )
+static int parse_process_tree_until_empty( void )
 {
     int eachwait = 10000;
     int count = 0;
@@ -438,6 +434,7 @@ main (int argc, char **argv)
   double timeout;
   char signame[SIG2STR_MAX];
   int c;
+  setlocale (LC_ALL, "");
 
   initialize_main (&argc, &argv);
   set_program_name (argv[0]);
