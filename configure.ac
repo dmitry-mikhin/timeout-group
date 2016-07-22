@@ -107,6 +107,17 @@ AC_ARG_ENABLE([gcc-warnings],
                           && gl_gcc_warnings=yes])]
 )
 
+AC_ARG_WITH([systemd],
+  [AS_HELP_STRING([--with-systemd], [enable systemd support])],
+  [], [with_systemd=no]
+)
+if test "x$with_systemd" != xno; then
+  AM_CONDITIONAL(WITH_SYSTEMD, true)
+  AC_DEFINE(WITH_SYSTEMD, 1, [enable systemd support])
+else
+  AM_CONDITIONAL(WITH_SYSTEMD, false)
+fi
+
 if test "$gl_gcc_warnings" = yes; then
   gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
   AC_SUBST([WERROR_CFLAGS])

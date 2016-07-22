@@ -162,6 +162,7 @@ automake --copy --add-missing
 %configure --enable-largefile \
            --with-openssl=optional ac_cv_lib_crypto_MD5=no \
            --with-tty-group \
+           --with-systemd \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 
 # Regenerate manpages
