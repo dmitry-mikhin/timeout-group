@@ -157,6 +157,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 #autoreconf -i -v
 touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
 aclocal -I m4
+autoheader
 autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile \
