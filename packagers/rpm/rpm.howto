@@ -67,3 +67,10 @@ thus timeout-group can be installed and used in parallel with coreutils.
 
        $ cd ~/rpmbuild/SRPMS
        $ rpmbuild --rebuild --clean timeout-group-8.22-15.el7.1.src.rpm
+
+Regrettably, this method does not work if you change the files that are not in
+the original RPM sources but are in the original git tree. An example would be
+changes in .gitignore file. The "format-patch" command records such changes as
+changes, not as a new file, but from RPM patch point of view it is a new file,
+causing failure. Try to avoid changing such files. Cannot suggest any automated
+process as of now.
